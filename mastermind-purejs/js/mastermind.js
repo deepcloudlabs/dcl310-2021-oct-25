@@ -8,11 +8,29 @@ function Move(guess, message) {
     this.guess = guess;
     this.message = message;
 }
+
 // ES6: syntactic sugar: class MoveES6 {...} --> function Move(...){...}
 class MoveES6 {
     constructor(guess, message) {
         this.guess = guess;
         this.message = message;
+    }
+}
+
+class GameStatistics {
+    constructor() {
+        this.wins = 0;
+        this.loses = 0;
+        this.total = 0;
+    }
+
+    playerWins = () => {
+        this.wins++;
+        this.total++;
+    }
+    playerLoses = () => {
+        this.loses++;
+        this.total++;
     }
 }
 
@@ -23,20 +41,36 @@ class MastermindViewModel {
         this.tries = 0;
         this.moves = []; // empty array
         this.secret = this.createSecret();
+        this.counter = 60;
+        this.statistics = new GameStatistics();
+        // this.play = this.play.bind(this);
     }
 
-    play(guess) {
+    countDown = () => {
+        this.counter--;
+        if (this.counter <= 0) {
+            this.initGame();
+            this.statistics.playerLoses();
+            return "loses";
+        }
+        return "continues";
+    }
+
+    play = (guess) => {
         this.tries++;
         if (Number(guess) === this.secret) {
             this.gameLevel++;
             if (this.gameLevel > 10) {
-                //TODO: Player wins the game
+                this.gameLevel = 3;
+                this.initGame();
+                this.statistics.playerWins();
                 return "wins";
             }
             this.initGame();
         } else {
             if (this.tries > 10) {
-                //TODO: Game is over!
+                this.initGame();
+                this.statistics.playerLoses();
                 return "loses";
             } else {
                 this.moves.push(this.createMove(guess));
@@ -44,7 +78,7 @@ class MastermindViewModel {
         }
     }
 
-    createSecret() {
+    createSecret = () => {
         let digits = []; // [5, 4, 9] -> 549
         digits.push(this.createRandomDigit(1, 9));
         while (digits.length < this.gameLevel) {
@@ -55,17 +89,18 @@ class MastermindViewModel {
         return digits.reduce((number, digit) => 10 * number + digit, 0);
     }
 
-    createRandomDigit(min = 0, max = 9) {
+    createRandomDigit = (min = 0, max = 9) => {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
-    initGame() {
+    initGame = () => {
         this.tries = 0;
+        this.counter = 60;
         this.moves = [];
         this.secret = this.createSecret();
     }
 
-    createMove(guess) {
+    createMove = (guess) => {
         let guessAsString = guess.toString();
         let secretAsString = this.secret.toString();
         let perfectMatch = 0, partialMatch = 0;

@@ -8,7 +8,7 @@ let emptyElement = (element) => {
             node.removeChild(node.lastChild);
         }
     }
-} ;
+};
 
 let masterMindViewModel = new MastermindViewModel();
 window.onload = () => {
@@ -16,17 +16,31 @@ window.onload = () => {
     let guessInputText = document.querySelector("#guess")
     let tries = document.querySelector("#tries")
     let gameLevel = document.querySelector("#gameLevel")
+    let counter = document.querySelector("#counter")
     let moves = document.querySelector("#moves")
-
-    playButton.addEventListener('click', function(e){
-        masterMindViewModel.play(guessInputText.value)
-        tries.innerHTML = masterMindViewModel.tries
+    let wins = document.querySelector("#wins")
+    let loses = document.querySelector("#loses")
+    let updateProgressBar = () => {
+        counter.innerHTML = masterMindViewModel.counter;
+        counter.setAttribute("style", "width: " + (10 * masterMindViewModel.counter) / 6 + "%;");
+        let clazz = "progress-bar progress-bar-striped progress-bar-success";
+        if (masterMindViewModel.counter < 20) {
+            clazz = "progress-bar progress-bar-striped progress-bar-danger";
+        } else if (masterMindViewModel.counter < 40) {
+            clazz = "progress-bar progress-bar-striped progress-bar-warning";
+        }
+        counter.setAttribute("class", clazz);
+    }
+    let updateView = () => {
+        tries.innerHTML = masterMindViewModel.tries;
+        wins.innerHTML = masterMindViewModel.statistics.wins;
+        loses.innerHTML = masterMindViewModel.statistics.loses;
         gameLevel.innerHTML = masterMindViewModel.gameLevel
-        if (masterMindViewModel.moves.length === 0){
+        if (masterMindViewModel.moves.length === 0) {
             emptyElement(moves)
         } else {
             let length = masterMindViewModel.moves.length;
-            let lastMove = masterMindViewModel.moves[length -1];
+            let lastMove = masterMindViewModel.moves[length - 1];
             let row = moves.insertRow()
             let cellNo = row.insertCell(0);
             cellNo.appendChild(document.createTextNode(length.toString()));
@@ -35,5 +49,15 @@ window.onload = () => {
             let cellMessage = row.insertCell(2);
             cellMessage.appendChild(document.createTextNode(lastMove.message.toString()));
         }
-    } , false)
+    }
+    setInterval(() => {
+        let status = masterMindViewModel.countDown();
+        updateProgressBar();
+        if (status === "loses")
+            updateView();
+    }, 1000)
+    playButton.addEventListener('click', function (e) {
+        masterMindViewModel.play(guessInputText.value)
+        updateView();
+    }, false)
 }
