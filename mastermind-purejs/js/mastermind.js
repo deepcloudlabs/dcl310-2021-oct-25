@@ -89,7 +89,7 @@ class MastermindViewModel {
             if (perfectMatch > 0)
                 message += "+" + perfectMatch;
             if (partialMatch > 0)
-                message += "+" + partialMatch;
+                message += "-" + partialMatch;
         }
         return new Move(guess, message);
     }
