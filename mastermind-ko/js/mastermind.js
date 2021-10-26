@@ -2,40 +2,11 @@
     View: game.html -> html, css (bootstrap)
     ViewModel: mastermind.js -> js
  */
-
-// Before ES6:
-function Move(guess, message) {
-    this.guess = guess;
-    this.message = message;
-}
-
-// ES6: syntactic sugar: class MoveES6 {...} --> function Move(...){...}
-class MoveES6 {
-    constructor(guess, message) {
-        this.guess = guess;
-        this.message = message;
-    }
-}
-
-class GameStatistics {
-    constructor() {
-        this.wins = ko.observable(0);
-        this.loses = ko.observable(0);
-        this.total = ko.computed(() => {
-            return this.wins() + this.loses()
-        });
-    }
-
-    playerWins = () => {
-        this.wins(this.wins()+1);
-    }
-    playerLoses = () => {
-        this.loses(this.loses()+1);
-    }
-}
-
 //ES6: class
-class MastermindViewModel { // Knockout's ViewModel
+import {GameStatistics} from "./statistics.js";
+import {Move} from "./utility.js";
+
+export class MastermindViewModel { // Knockout's ViewModel
     constructor() {
         this.gameLevel = ko.observable(3);
         this.tries = ko.observable(0);
@@ -44,23 +15,34 @@ class MastermindViewModel { // Knockout's ViewModel
         this.secret = this.createSecret();
         this.counter = ko.observable(60);
         this.statistics = new GameStatistics();
+        this.progressBarClass = ko.computed(() => {
+            let clazz = "progress-bar progress-bar-striped progress-bar-animated bg-success";
+            if (this.counter() < 20) {
+                clazz = "progress-bar progress-bar-striped progress-bar-animated bg-danger";
+            } else if (this.counter() < 40) {
+                clazz = "progress-bar progress-bar-striped progress-bar-animated bg-warning";
+            }
+            return clazz;
+        });
+        this.progressBarWidth = ko.computed(() => {
+            return `${10 * this.counter() / 6}%`;
+        });
         // this.play = this.play.bind(this);
+        setInterval(this.countDown, 1000);
     }
 
     countDown = () => {
-        this.counter(this.counter()-1);
+        this.counter(this.counter() - 1);
         if (this.counter() <= 0) {
             this.initGame();
             this.statistics.playerLoses();
-            return "loses";
         }
-        return "continues";
     }
 
     play = () => {
-        this.tries(this.tries()+1);
+        this.tries(this.tries() + 1);
         if (Number(this.guess()) === this.secret) {
-            this.gameLevel(this.gameLevel()+1);
+            this.gameLevel(this.gameLevel() + 1);
             if (this.gameLevel() > 10) {
                 this.gameLevel(3);
                 this.initGame();

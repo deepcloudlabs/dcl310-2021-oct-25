@@ -15,4 +15,10 @@ async function haveGun() {
     let numbers = await getLotteryNumbers();
 
 }
+x = 32;
+y = 56;
+z = x + y; // 88
+x++; // 33
+// z? reactive -> 89
+
 

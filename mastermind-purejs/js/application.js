@@ -23,11 +23,11 @@ window.onload = () => {
     let updateProgressBar = () => {
         counter.innerHTML = masterMindViewModel.counter;
         counter.setAttribute("style", "width: " + (10 * masterMindViewModel.counter) / 6 + "%;");
-        let clazz = "progress-bar progress-bar-striped progress-bar-success";
+        let clazz = "progress-bar progress-bar-success";
         if (masterMindViewModel.counter < 20) {
-            clazz = "progress-bar progress-bar-striped progress-bar-danger";
+            clazz = "progress-bar progress-bar-danger";
         } else if (masterMindViewModel.counter < 40) {
-            clazz = "progress-bar progress-bar-striped progress-bar-warning";
+            clazz = "progress-bar progress-bar-warning";
         }
         counter.setAttribute("class", clazz);
     }
