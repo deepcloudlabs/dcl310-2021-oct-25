@@ -1,0 +1,28 @@
+a[href$="pdf"]:after {
+  content: url("pdf.png"); }
+
+a[href$="xlsx"]:after {
+  content: url("xlsx.png"); }
+
+a[href$="docx"]:after {
+  content: url("docx.png"); }
+
+a[href$="pptx"]:after {
+  content: url("pptx.png"); }
+
+a[href$="svg"]:after {
+  content: url("svg.png"); }
+
+a[href$="abc"]:after {
+  content: url("abc.png"); }
+
+a[href$="def"]:after {
+  content: url("def.png"); }
+
+a[href$="ghi"]:after {
+  content: url("ghi.png"); }
+
+a[href$="jkl"]:after {
+  content: url("jkl.png"); }
+
+/*# sourceMappingURL=file-type.css.map */
