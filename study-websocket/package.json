@@ -1,0 +1,16 @@
+{
+  "name": "study-websocket",
+  "version": "1.0.0",
+  "description": "",
+  "main": "exercise.js",
+  "scripts": {
+    "poll-binance-rest-api": "node exercise.js"
+  },
+  "dependencies": {
+    "node-fetch": "^2.6.5",
+    "ws": "^8.2.3"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

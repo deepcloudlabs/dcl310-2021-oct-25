@@ -91,8 +91,12 @@ app.post("/employees", (req, res) => {
         res.set("Content-Type", "application/json");
         if (err)
             res.status(400).send({"status": err})
-        else
+        else{
+            for (let socket of sockets){
+                socket.emit("hire", employee);
+            }
             res.status(200).send({"status": "ok"})
+        }
     });
 })
 // http://localhost:4001/employees?page=10&size=25
@@ -171,8 +175,12 @@ app.delete("/employees/:id", (req,res)=>{
                 res.status(400).send({status: err});
             else if (employee===null)
                 res.status(404).send({status: "cannot find employee to delete"});
-            else
+            else{
+                for (let socket of sockets){
+                    socket.emit("fire", employee);
+                }
                 res.status(200).send(employee);
+            }
         }
     );
 });
@@ -184,5 +192,23 @@ app.delete("/employees/:id", (req,res)=>{
 // req.body -> Base64Encoding+JSON.stringfy() -> URL -> query parameter
 //endregion
 
-app.listen(port);
+let server = app.listen(port);
+//region REST over WEBSOCKET API
+let io=require("socket.io").listen(server);
+io.set("origins", "*:*");
+let sockets = [];
+
+io.on("connect", socket => {
+    sockets.push(socket);
+    socket.on("disconnect", () => {
+        let index = sockets.indexOf(socket);
+        if (index >= 0){
+            sockets.splice(index,1);
+        }
+    })
+})
+io.on("sample", msg => {
+
+});
+//endregion
 console.log(`Server is running at ${port}`);

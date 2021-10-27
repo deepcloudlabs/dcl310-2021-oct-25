@@ -4,7 +4,8 @@
   "description": "HR MicroService using MongoDB at the db tier",
   "main": "service.js",
   "scripts": {
-    "middleware": "nodemon ./ --exec babel-node service.js"
+    "middleware": "nodemon ./ --exec babel-node service.js",
+    "ws-client": "node websocket-node-client.js"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
@@ -15,7 +16,9 @@
     "body-parser": "^1.19.0",
     "debug": "^4.3.2",
     "morgan": "^1.10.0",
-    "swagger-ui-express": "^4.1.6"
+    "swagger-ui-express": "^4.1.6",
+    "socket.io": "2.4.1",
+    "socket.io-client": "2.4.0"
   },
   "keywords": [
     "MicroService",
