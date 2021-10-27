@@ -126,6 +126,62 @@ app.get("/employees/:id", (req, res) => {
                 res.status(200).send(employee);
         });
 })
+// 1) Updating a resource:
+// i) PUT -> Full Resource
+// ii) PATCH -> Difference: {salary: 25000, department: SALES}
+//                          { photo: "....."}
+
+// 2) Updatable Fields: Domain Expert -> ["salary", "iban", "department", "photo", "fulltime"]
+// GET,PUT,PATCH, DELETE -> existing resource
+// POST -> brand new resource
+// GET, DELETE: you cannot put resource in request body
+// GET, POST, PUT, PATCH, DELETE: response body
+app.put("/employees/:id", (req, res) => {
+    let identityNo = req.params.id;
+    let emp = req.body;
+    let updatableFields = [
+        "salary", "iban", "department", "photo", "fulltime"
+    ]
+    let updatedFields = {}
+    for (let field in emp) {
+        if (updatableFields.includes(field)) {
+            updatedFields[field] = emp[field];
+        }
+    }
+    Employee.update({identityNo},
+        {$set: updatedFields},
+        {upsert: false},
+        (err, employee) => {
+            res.set("Content-Type: application/json");
+            if (err)
+                res.status(404).send({status: err});
+            else res.status(200).send(employee);
+        })
+})
+
+// pagination
+
+app.delete("/employees/:id", (req,res)=>{
+    let identityNo = req.params.id;
+    Employee.findOneAndDelete(
+        {identityNo},
+        (err,employee) => {
+            res.set("Content-Type: application/json");
+            if (err)
+                res.status(400).send({status: err});
+            else if (employee===null)
+                res.status(404).send({status: "cannot find employee to delete"});
+            else
+                res.status(200).send(employee);
+        }
+    );
+});
+// DELETE http://localhost:4001/employees?criteria=department&value=IT
+//{ criteria: {"department": true, "salary": "$gt"}, "values": ["IT", "SALES"]}
+//?identites=1,2,3,4,5,6
+//["1","2","3"]
+// Base64 Encode -> JSON.stringfy(["1","2","3"])
+// req.body -> Base64Encoding+JSON.stringfy() -> URL -> query parameter
 //endregion
 
 app.listen(port);
