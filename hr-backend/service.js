@@ -4,7 +4,7 @@ import bodyParser from "body-parser";
 
 // Layered Architecture
 // Database                   : MongoDB  ✔  Schema-less
-// Persistence Layer          : Mongoose -> Schema
+// Persistence Layer          : Mongoose -> Schema -> Model ✔
 //region Persistence Layer
 import * as mongoose from "mongoose";
 import {connect, model, mongo, Schema, Types} from "mongoose";
@@ -16,7 +16,9 @@ import util from "./utility";
 //                    IoT, Ultra Low-Latency (AlgoTrading, HFT)
 //                    MongoDB
 const employeeSchema = new Schema({
-    "_id": Types.ObjectId,
+    "_id": {
+        type: String
+    },
     "fullname": {
         type: String,
         required: true,
@@ -62,6 +64,7 @@ const Employee = model('employees', employeeSchema);
 const port = 4001;
 const app = express();
 
+//region Configurations: CORS + HTTP Logging + JSON Document Size Limit
 app.use(bodyParser.json({limit: '5mb'}))
 app.use(logger('dev'));
 app.use(function (req, res, next) {
@@ -70,8 +73,60 @@ app.use(function (req, res, next) {
     res.header("Access-Control-Allow-Headers", "Origin, X-Requested-Width, Content-Type, Accept");
     next();
 });
+//endregion
+
+//region Swagger UI Configuration
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = require('./swagger');
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+//endregion
+
+//region REST API
+app.post("/employees", (req, res) => {
+    let emp = req.body;
+    emp._id = emp.identityNo;
+
+    let employee = new Employee(emp);
+    employee.save((err, new_emp) => {
+        res.set("Content-Type", "application/json");
+        if (err)
+            res.status(400).send({"status": err})
+        else
+            res.status(200).send({"status": "ok"})
+    });
+})
+// http://localhost:4001/employees?page=10&size=25
+// http://localhost:4001/employees
+
+app.get("/employees", (req, res) => {
+    let page = Number(req.query.page) || 1;
+    let size = Number(req.query.size) || 10;
+    let offset = (page - 1) * size;
+    Employee.find({},
+        {"__v": false, "_id": false},
+        {skip: offset, limit: size},
+        (err, employees) => {
+            res.set("Content-Type: application/json");
+            if (err)
+                res.status(400).send({"status": err})
+            else
+                res.status(200).send(employees);
+        })
+})
+
+app.get("/employees/:id", (req, res) => {
+    let identityNo = req.params.id;
+    Employee.findOne({'identityNo': identityNo},
+        {"__v": false, "_id": false},
+        (err, employee) => {
+            res.set("Content-Type: application/json");
+            if (err || employee === null)
+                res.status(404).send({"status": "employee is not found!"})
+            else
+                res.status(200).send(employee);
+        });
+})
+//endregion
+
 app.listen(port);
 console.log(`Server is running at ${port}`);
